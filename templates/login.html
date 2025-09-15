@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale-1.0" />
+    <title>Login - Student Task Manager</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css"
+    />
+
+    <style>
+      body {
+        background-color: #f3f4f6; /* A very light grey background */
+      }
+      .login-card {
+        max-width: 450px;
+        margin: 3rem auto; /* Centers the card nicely */
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* A soft shadow */
+      }
+      nav {
+        background-color: white;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="container-fluid">
+      <ul>
+        <center>
+          <li><strong>🎓 Student Task Manager</strong></li>
+        </center>
+      </ul>
+    </nav>
+
+    <main class="container">
+      <article class="login-card">
+        <hgroup>
+          <h1>Sign In</h1>
+          <p>Welcome back! Please enter your details to continue.</p>
+        </hgroup>
+
+        <form id="login-form">
+          <label for="username">Username</label>
+          <input
+            type="text"
+            id="username"
+            name="username"
+            placeholder="e.g., testuser"
+            required
+          />
+
+          <label for="password">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="••••••••••"
+            required
+          />
+
+          <button type="submit" class="contrast">Login</button>
+        </form>
+
+        <footer>
+          <p>
+            Don't have an account?
+            <a href="{{ url_for('register_page') }}">Register now</a>
+          </p>
+        </footer>
+      </article>
+    </main>
+    <script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+  </body>
+</html>
