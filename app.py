@@ -1,5 +1,5 @@
 import os # NEW import for file paths
-from flask import Flask, request, jsonify, render_template, send_from_directory # Add send_from_directory
+from flask import Flask, request, jsonify, render_template, send_from_directory, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename # NEW import for secure filenames
@@ -112,7 +112,12 @@ def get_tasks():
 # ... (The rest of your code: login, register, update, delete, stats, etc. remains the same) ...
 @app.route('/')
 def index():
-    return "Hello, World!"
+    # If the user is already logged in, send them to the dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard'))
+    # If they are not logged in, send them to the login page
+    else:
+        return redirect(url_for('login_page'))
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -133,6 +138,11 @@ def login():
     login_user(user)
     return jsonify({'message': 'Login successful!'})
 
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login_page'))
 
 @app.route('/api/tasks/<int:task_id>', methods=['PUT'])
 @login_required
@@ -140,7 +150,7 @@ def update_task(task_id):
     task = Task.query.get(task_id)
     if not task or task.owner != current_user:
         return jsonify({'message': 'Task not found or permission denied!'}), 404
-    task.is_complete = True
+    task.is_complete = not task.is_complete # This will toggle the status
     db.session.commit()
     return jsonify({'message': 'Task marked as complete!'})
 
@@ -154,6 +164,28 @@ def delete_task(task_id):
     db.session.commit()
     return jsonify({'message': 'Task deleted successfully!'})
 
+@app.route('/api/tasks/<int:task_id>/edit', methods=['PUT'])
+@login_required
+def edit_task(task_id):
+    task = Task.query.get(task_id)
+    if not task or task.owner != current_user:
+        return jsonify({'message': 'Task not found or permission denied!'}), 404
+
+    data = request.get_json()
+    task.title = data.get('title', task.title)
+    task.notes = data.get('notes', task.notes)
+    task.priority = data.get('priority', task.priority)
+    task.category = data.get('category', task.category)
+    
+    due_date_str = data.get('due_date')
+    if due_date_str:
+        # Check for empty string before converting
+        task.due_date = datetime.fromisoformat(due_date_str) if due_date_str else None
+    else:
+        task.due_date = None
+
+    db.session.commit()
+    return jsonify({'message': 'Task updated successfully!'})
 
 @app.route('/api/stats', methods=['GET'])
 @login_required
